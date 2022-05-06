@@ -25,7 +25,7 @@ const getCurrentUser = async (req, res) => {
 
 const updateSubscription = async (req, res) => {
   const user = await service.updateSubscription(req.body);
-  res.status(201).send(serializeUser(user));
+  res.status(200).send(serializeUser(user));
 };
 
 exports.usersController = {
