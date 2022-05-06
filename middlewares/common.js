@@ -9,11 +9,12 @@ const ctrlWrapper = controller => async (req, res, next) => {
 const validateRequest =
   (schema, reqParamsType = 'body') =>
   (req, res, next) => {
-    const { error } = schema.validate(req[reqParamsType]);
+    const { value, error } = schema.validate(req[reqParamsType]);
     if (error) {
-      return res.status(400).send(error);
+      return res.status(400).send(error.details[0].message);
     }
+    req[reqParamsType] = value;
     next();
   };
 
-module.exports = { ctrlWrapper, validateRequest };
+exports.commonMiddlewares = { ctrlWrapper, validateRequest };

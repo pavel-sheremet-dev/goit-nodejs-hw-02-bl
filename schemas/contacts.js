@@ -1,6 +1,21 @@
 const joi = require('joi');
 const { isValidObjectId } = require('mongoose');
 
+const checkObjectId = (value, helpers) => {
+  if (!isValidObjectId(value)) {
+    return helpers.message('Contact not Found. Invalid ID');
+  }
+  return value;
+};
+
+const checkLimit = (value, helpers) => {
+  const max = 20;
+  if (value > max) {
+    return helpers.message(`Max limit is ${max}`);
+  }
+  return value;
+};
+
 const contact = joi.object({
   name: joi
     .string()
@@ -26,15 +41,20 @@ const updateStatusContact = joi.object({
 });
 
 const id = joi.object({
-  id: joi
-    .string()
-    .custom((value, helpers) => {
-      if (!isValidObjectId(value)) {
-        return helpers.error('Contact not Found. Invalid ID');
-      }
-      return value;
-    })
-    .required(),
+  id: joi.string().custom(checkObjectId).required(),
 });
 
-exports.schema = { contact, updateContact, updateStatusContact, id };
+const queryParams = joi.object({
+  page: joi.number(),
+  limit: joi.number().custom(checkLimit),
+  favorite: joi.boolean(),
+});
+
+
+exports.contactsSchema = {
+  contact,
+  updateContact,
+  updateStatusContact,
+  id,
+  queryParams,
+};

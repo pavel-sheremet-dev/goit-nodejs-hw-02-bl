@@ -21,13 +21,23 @@ const contactsSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
-const schemaErrorHandlingMiddlware = (error, doc, next) => {
+const populateOwner = function (...fieds) {
+  return function () {
+    this.populate('owner', fieds);
+  };
+};
+
+const schemaErrorHandling = (error, doc, next) => {
   if (error.name === 'MongoServerError' && error.code === 11000) {
     next(
       new errors[409](
-        `User with email "${error.keyValue.email}" already exist`,
+        `Contact with email "${error.keyValue.email}" already exist`,
       ),
     );
   } else {
@@ -35,6 +45,10 @@ const schemaErrorHandlingMiddlware = (error, doc, next) => {
   }
 };
 
-contactsSchema.post(['save', 'findOneAndUpdate'], schemaErrorHandlingMiddlware);
+contactsSchema.pre(
+  ['find', 'findOne', 'findOneAndUpdate'],
+  populateOwner('email'),
+);
+contactsSchema.post(['save', 'findOneAndUpdate'], schemaErrorHandling);
 
-exports.model = mongoose.model('Contact', contactsSchema, 'contacts');
+exports.Contact = mongoose.model('Contact', contactsSchema, 'contacts');
