@@ -3,6 +3,9 @@ const { Router } = require('express');
 const { usersSchema: schema } = require('../../schemas');
 const { usersController: controller } = require('../../controllers');
 const { commonMiddlewares, usersMiddlewares } = require('../../middlewares');
+const { config } = require('../../config');
+
+const superAdmin = config.getSubscriptions().super;
 
 const { ctrlWrapper, validateRequest } = commonMiddlewares;
 const { authhorize } = usersMiddlewares;
@@ -27,7 +30,8 @@ router.get('/current', authhorize(), ctrlWrapper(controller.getCurrentUser));
 
 router.patch(
   '/users',
-  authhorize(),
+  authhorize(superAdmin),
+  validateRequest(schema.updateSubscription),
   ctrlWrapper(controller.updateSubscription),
 );
 

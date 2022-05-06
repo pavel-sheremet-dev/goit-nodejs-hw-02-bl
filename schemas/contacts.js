@@ -1,12 +1,5 @@
 const joi = require('joi');
-const { isValidObjectId } = require('mongoose');
-
-const checkObjectId = (value, helpers) => {
-  if (!isValidObjectId(value)) {
-    return helpers.message('Contact not Found. Invalid ID');
-  }
-  return value;
-};
+const { checkObjectId } = require('../helpers');
 
 const checkLimit = (value, helpers) => {
   const max = 20;
@@ -49,7 +42,6 @@ const queryParams = joi.object({
   limit: joi.number().custom(checkLimit),
   favorite: joi.boolean(),
 });
-
 
 exports.contactsSchema = {
   contact,

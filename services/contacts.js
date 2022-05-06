@@ -1,5 +1,6 @@
 const { NotFound } = require('http-errors');
 const { Contact } = require('../models');
+const { filters } = require('../helpers');
 
 const addContact = async reqParams => await Contact.create(reqParams);
 
@@ -7,7 +8,7 @@ const getContacts = async (pagination, filterParams) => {
   const { page, limit } = pagination;
   const skip = (page - 1) * limit;
 
-  const filter = getFilter(filterParams);
+  const filter = filters.getFromQueryParams(filterParams);
 
   const [contacts, totalContacts] = await Promise.all([
     Contact.find(filter).skip(skip).limit(limit),
@@ -42,14 +43,6 @@ const deleteContact = async (id, owner) => {
   const result = await Contact.deleteOne({ _id: id, owner });
   if (!result.deletedCount) throw new NotFound('Contact not found');
 };
-
-// hepler
-
-const getFilter = params =>
-  Object.keys(params).reduce((acc, key) => {
-    if (params[key] === undefined) return acc;
-    return { ...acc, [key]: params[key] };
-  }, {});
 
 exports.contactsService = {
   addContact,

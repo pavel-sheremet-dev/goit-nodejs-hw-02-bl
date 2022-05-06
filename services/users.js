@@ -1,10 +1,12 @@
 const { User } = require('../models');
 const { NotFound, Forbidden } = require('http-errors');
-const jwt = require('jsonwebtoken');
-const bcryptjs = require('bcryptjs');
+const { auth } = require('../helpers');
+const { config } = require('../config');
+
+const superAdmin = config.getSubscriptions().super;
 
 const signUp = async reqParams => {
-  const hashPassword = await createHashPassword(reqParams.password);
+  const hashPassword = await auth.createHashPassword(reqParams.password);
   const user = await User.create({ ...reqParams, password: hashPassword });
   return user;
 };
@@ -14,11 +16,11 @@ const signIn = async ({ email, password }) => {
   if (!user)
     throw new NotFound('User not found. Please check email or sign up');
 
-  const isValidPassword = await comparePassword(password, user.password);
+  const isValidPassword = await auth.comparePassword(password, user.password);
 
   if (!isValidPassword) throw new Forbidden('Password is wrong');
 
-  const token = createToken(user);
+  const token = auth.createToken(user);
 
   await User.findByIdAndUpdate(
     user.id,
@@ -40,37 +42,29 @@ const getCurrentUser = async id => {
   return user;
 };
 
-const updateSubscription = async subscription => {};
+const updateSubscription = async ({
+  id,
+  subscription,
+  superAdminPassword = 'empty',
+}) => {
+  const isUpdatetoAdmin = subscription === superAdmin;
+  const isCorrectPassword = superAdminPassword === process.env.ADMIN_PASSWORD;
 
-// heplers
-
-const createHashPassword = async password => {
-  try {
-    const hashPassword = await bcryptjs.hash(
-      password,
-      parseInt(process.env.ROUNDS) ?? 10,
-    );
-    return hashPassword;
-  } catch (error) {
-    throw new Error('something went wrong.');
+  if (isUpdatetoAdmin && !isCorrectPassword) {
+    throw new Forbidden('Аccess denied');
   }
-};
 
-const comparePassword = async (password, requiredPassword) => {
-  try {
-    const isValidPassword = await bcryptjs.compare(password, requiredPassword);
-    return isValidPassword;
-  } catch (error) {
-    throw new Error('something went wrong');
-  }
-};
+  const user = await User.findByIdAndUpdate(
+    id,
+    { subscription },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
 
-const createToken = user => {
-  const secret = process.env.JWT_SECRET;
-  const expiresIn = process.env.JWT_EXPIRES_IN;
-  return jwt.sign({ uid: user.id, permissions: [user.subscription] }, secret, {
-    expiresIn,
-  });
+  if (!user) throw new NotFound('User not found');
+  return user;
 };
 
 exports.usersService = {

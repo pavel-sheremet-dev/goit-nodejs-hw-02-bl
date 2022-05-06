@@ -1,6 +1,7 @@
 const errors = require('http-errors');
 
 const mongoose = require('mongoose');
+const { config } = require('../config');
 const { Schema } = mongoose;
 
 const usersSchema = new Schema({
@@ -15,8 +16,8 @@ const usersSchema = new Schema({
   },
   subscription: {
     type: String,
-    enum: ['starter', 'pro', 'business'],
-    default: 'starter',
+    enum: config.getSubscriptions().all,
+    default: config.getSubscriptions().starter,
   },
   token: {
     type: String,
