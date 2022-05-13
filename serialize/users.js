@@ -1,7 +1,8 @@
-const serializeUser = ({ id, email, subscription }) => ({
+const serializeUser = ({ id, email, subscription, avatarUrl }) => ({
   id,
   email,
   subscription,
+  avatarUrl,
 });
 
 const serializeSignInResponce = ({ user, token }) => ({
@@ -9,4 +10,12 @@ const serializeSignInResponce = ({ user, token }) => ({
   token,
 });
 
-exports.usersSerializes = { serializeUser, serializeSignInResponce };
+const serializeUserAvatarUrl = ({ avatarUrl }) => ({
+  avatarUrl,
+});
+
+exports.usersSerializes = {
+  serializeUser,
+  serializeSignInResponce,
+  serializeUserAvatarUrl,
+};

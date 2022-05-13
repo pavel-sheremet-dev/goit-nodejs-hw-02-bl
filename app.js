@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const { usersRouter, contactsRouter } = require('./routes/api');
+const { usersRouter, contactsRouter, publicRouter } = require('./routes/api');
 
 const CORS = process.env.CORS ?? '*';
 
@@ -13,8 +13,11 @@ app.use(express.json());
 app.use(cors({ origin: CORS }));
 app.use(morgan(formatsLogger));
 
+app.use(express.static('public'));
+
 app.use('/api/contacts', contactsRouter);
 app.use('/api/users', usersRouter);
+app.use('/public', publicRouter);
 
 app.use((req, res) => {
   res.status(404).send({ message: 'Page Not found' });

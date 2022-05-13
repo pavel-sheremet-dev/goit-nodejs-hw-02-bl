@@ -1,13 +1,25 @@
 const { User } = require('../models');
-const { NotFound, Forbidden } = require('http-errors');
-const { auth } = require('../helpers');
-const { config } = require('../config');
+const { NotFound, Forbidden, BadRequest } = require('http-errors');
+const {
+  auth,
+  createAvatarUrl,
+  fsOperations,
+  resizeImage,
+} = require('../helpers');
+const { config, getDirPath } = require('../config');
+const path = require('path');
 
 const superAdmin = config.getSubscriptions().super;
 
 const signUp = async reqParams => {
-  const hashPassword = await auth.createHashPassword(reqParams.password);
-  const user = await User.create({ ...reqParams, password: hashPassword });
+  const { email, password } = reqParams;
+  const hashPassword = await auth.createHashPassword(password);
+  const user = await User.create({
+    ...reqParams,
+    password: hashPassword,
+    avatarUrl: createAvatarUrl(email),
+  });
+
   return user;
 };
 
@@ -67,10 +79,44 @@ const updateSubscription = async ({
   return user;
 };
 
+const updateAvatar = async (user, file, endpoint) => {
+  if (!file)
+    throw BadRequest(
+      'Error file format. Supported types: ".jpeg", ".jpg", ".png"',
+    );
+
+  const { filename, path: oldPath } = file;
+  const { id, avatarUrl: oldAvatarUrl } = user;
+
+  await resizeImage(oldPath);
+
+  const newPath = path.join(getDirPath().avatars, filename);
+
+  await fsOperations.replaceFile(oldPath, newPath);
+
+  const avatarUrl = endpoint + '/' + filename;
+
+  const userToUpdate = await User.findByIdAndUpdate(
+    id,
+    { avatarUrl },
+    {
+      new: true,
+    },
+  );
+
+  const pathTodelete = userToUpdate ? oldAvatarUrl : avatarUrl;
+  await fsOperations.removeOldFileFromPublic(pathTodelete);
+
+  if (!userToUpdate) throw new NotFound('User not found');
+
+  return userToUpdate;
+};
+
 exports.usersService = {
   signUp,
   signIn,
   signOut,
   getCurrentUser,
   updateSubscription,
+  updateAvatar,
 };

@@ -1,7 +1,8 @@
 const { usersService: service } = require('../services');
 const { usersSerializes } = require('../serialize');
 
-const { serializeUser, serializeSignInResponce } = usersSerializes;
+const { serializeUser, serializeSignInResponce, serializeUserAvatarUrl } =
+  usersSerializes;
 
 const signUp = async (req, res) => {
   const user = await service.signUp(req.body);
@@ -28,10 +29,17 @@ const updateSubscription = async (req, res) => {
   res.status(201).send(serializeUser(user));
 };
 
+const updateAvatar = async (req, res) => {
+  const { user, file, url } = req;
+  const updatedUser = await service.updateAvatar(user, file, url);
+  res.status(200).send(serializeUserAvatarUrl(updatedUser));
+};
+
 exports.usersController = {
   signUp,
   signIn,
   signOut,
   getCurrentUser,
   updateSubscription,
+  updateAvatar,
 };

@@ -1,4 +1,5 @@
 const joi = require('joi');
+const fs = require('fs');
 const { config } = require('../config');
 const { checkObjectId } = require('../helpers');
 
@@ -19,4 +20,16 @@ const updateSubscription = joi.object({
   superAdminPassword: joi.string().pattern(/^[0-9a-zA-Z_\s'’ʼ-]{8,30}$/),
 });
 
-exports.usersSchema = { signing, updateSubscription };
+const avatar = joi.custom((value, helpers) => {
+  const isValidMimetype = config
+    .getMimetypes()
+    .some(mimetype => mimetype === value.mimetype);
+  if (!isValidMimetype) {
+    return helpers.message(
+      'Error file format. Supported types: ".jpeg", ".jpg", ".png"',
+    );
+  }
+  return value;
+});
+
+exports.usersSchema = { signing, updateSubscription, avatar };
