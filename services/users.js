@@ -1,5 +1,5 @@
 const { User } = require('../models');
-const { NotFound, Forbidden, BadRequest } = require('http-errors');
+const { NotFound, Forbidden } = require('http-errors');
 const {
   auth,
   createAvatarUrl,
@@ -80,11 +80,6 @@ const updateSubscription = async ({
 };
 
 const updateAvatar = async (user, file, endpoint) => {
-  if (!file)
-    throw BadRequest(
-      'Error file format. Supported types: ".jpeg", ".jpg", ".png"',
-    );
-
   const { filename, path: oldPath } = file;
   const { id, avatarUrl: oldAvatarUrl } = user;
 

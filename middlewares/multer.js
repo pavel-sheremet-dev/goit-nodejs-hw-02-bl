@@ -2,6 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const { v4: uuid } = require('uuid');
 const { getDirPath, config } = require('../config');
+const { BadRequest } = require('http-errors');
 
 const storage = multer.diskStorage({
   destination: getDirPath().temp,
@@ -19,8 +20,12 @@ const fileFilter = (req, file, cb) => {
     .getMimetypes()
     .some(mimetype => mimetype === file.mimetype);
   if (!isValidMimetype) {
-    req.fileValidationError = 'Forbidden extension';
-    return cb(null, false, req.fileValidationError);
+    cb(
+      new BadRequest(
+        'Error file format. Supported types: ".jpeg", ".jpg", ".png"',
+      ),
+    );
+    return;
   }
   cb(null, true);
 };
