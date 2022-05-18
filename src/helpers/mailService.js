@@ -27,7 +27,7 @@ const sendEmailWithControl = async msg => {
   const sendEmailLocal = sendEmailClosureFunc(msg);
   const status = await sendEmailLocal();
   if (!status) {
-    retrySendEmail(sendMailLocal);
+    retrySendEmail(sendEmailLocal);
   }
   return status;
 };
