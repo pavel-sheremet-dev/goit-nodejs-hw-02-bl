@@ -5,8 +5,22 @@ const { serializeUser, serializeSignInResponce, serializeUserAvatarUrl } =
   usersSerializes;
 
 const signUp = async (req, res) => {
-  const user = await service.signUp(req.body);
+  const user = await service.signUp(req.body, req.baseUrl);
   res.status(201).send(serializeUser(user));
+};
+
+const verifyUser = async (req, res) => {
+  const userEmail = await service.verifyUser(req.params.verificationToken);
+  res
+    .status(200)
+    .send({ message: `User '${userEmail}' has been successfully verified` });
+};
+
+const sendVerifyEmail = async (req, res) => {
+  const userEmail = await service.sendVerifyEmail(req.body.email, req.baseUrl);
+  res
+    .status(200)
+    .send({ message: `Verification email has been sent to '${userEmail}'` });
 };
 
 const signIn = async (req, res) => {
@@ -32,11 +46,13 @@ const updateSubscription = async (req, res) => {
 const updateAvatar = async (req, res) => {
   const { user, file, url } = req;
   const updatedUser = await service.updateAvatar(user, file, url);
-  res.status(200).send(serializeUserAvatarUrl(updatedUser));
+  res.status(201).send(serializeUserAvatarUrl(updatedUser));
 };
 
 exports.usersController = {
   signUp,
+  verifyUser,
+  sendVerifyEmail,
   signIn,
   signOut,
   getCurrentUser,

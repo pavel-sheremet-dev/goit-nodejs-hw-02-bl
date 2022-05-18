@@ -22,6 +22,14 @@ router.post(
   ctrlWrapper(controller.signUp),
 );
 
+router.get('/verify/:verificationToken', ctrlWrapper(controller.verifyUser));
+
+router.post(
+  '/verify',
+  validateRequest(schema.verify),
+  ctrlWrapper(controller.sendVerifyEmail),
+);
+
 router.post(
   '/signin',
   validateRequest(schema.signing),

@@ -1,5 +1,4 @@
 const joi = require('joi');
-const fs = require('fs');
 const { config } = require('../config');
 const { checkObjectId } = require('../helpers');
 
@@ -11,6 +10,10 @@ const signing = joi.object({
     .required(),
 });
 
+const verify = joi.object({
+  email: joi.string().email().required(),
+});
+
 const updateSubscription = joi.object({
   id: joi.string().custom(checkObjectId).required(),
   subscription: joi
@@ -20,4 +23,4 @@ const updateSubscription = joi.object({
   superAdminPassword: joi.string().pattern(/^[0-9a-zA-Z_\s'’ʼ-]{8,30}$/),
 });
 
-exports.usersSchema = { signing, updateSubscription };
+exports.usersSchema = { signing, updateSubscription, verify };

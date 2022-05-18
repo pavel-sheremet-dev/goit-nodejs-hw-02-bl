@@ -1,7 +1,11 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
-const { usersRouter, contactsRouter, publicRouter } = require('./routes/api');
+const {
+  usersRouter,
+  contactsRouter,
+  publicRouter,
+} = require('./src/routes/api');
 
 const CORS = process.env.CORS ?? '*';
 
@@ -25,7 +29,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   const statusCode = err.status ?? 500;
-  res.status(statusCode).send(err.message);
+  res.status(statusCode).send({ message: err.message });
 });
 
 module.exports = app;
