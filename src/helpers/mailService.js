@@ -2,7 +2,7 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendMail = async msg => {
+const sendEmail = async msg => {
   try {
     const sendedMessage = await sgMail.send(msg);
     return sendedMessage[0].statusCode;
@@ -22,10 +22,10 @@ const retrySendEmail = (sendMailFunction, count = 2, interval = 20) => {
   }, interval * 1000);
 };
 
-const sendMailWithControl = async msg => {
-  const sendMailClosureFunc = msg => async () => await sendMail(msg);
-  const sendMailLocal = sendMailClosureFunc(msg);
-  const status = await sendMailLocal();
+const sendEmailWithControl = async msg => {
+  const sendEmailClosureFunc = msg => async () => await sendEmail(msg);
+  const sendEmailLocal = sendEmailClosureFunc(msg);
+  const status = await sendEmailLocal();
   if (!status) {
     retrySendEmail(sendMailLocal);
   }
@@ -35,7 +35,7 @@ const sendMailWithControl = async msg => {
 const getVerificationUrl = (baseRoutePath, verificationToken) =>
   `${process.env.SERVER_BASE_URL}${baseRoutePath}/verify/${verificationToken}`;
 
-const sendVerificationMail = async (to, baseRoutePath, verificationToken) => {
+const sendVerificationEmail = async (to, baseRoutePath, verificationToken) => {
   const verificationUrl = getVerificationUrl(baseRoutePath, verificationToken);
 
   const msg = {
@@ -50,7 +50,7 @@ const sendVerificationMail = async (to, baseRoutePath, verificationToken) => {
     // },
   };
 
-  return await sendMailWithControl(msg);
+  return await sendEmailWithControl(msg);
 };
 
-exports.mailService = { sendVerificationMail };
+exports.mailService = { sendVerificationEmail };

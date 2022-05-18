@@ -33,7 +33,7 @@ const signUp = async (reqParams, baseUrl) => {
     verificationToken,
   });
 
-  mailService.sendVerificationMail(email, baseUrl, verificationToken);
+  mailService.sendVerificationEmail(email, baseUrl, verificationToken);
 
   return user;
 };
@@ -65,7 +65,7 @@ const sendVerifyEmail = async (email, baseUrl) => {
   if (user.verified)
     throw new BadRequest('Verification has already been passed');
 
-  mailService.sendVerificationMail(email, baseUrl, user.verificationToken);
+  mailService.sendVerificationEmail(email, baseUrl, user.verificationToken);
 
   return user.email;
 };
